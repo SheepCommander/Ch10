@@ -596,24 +596,29 @@ public class CompilationEngine {
             case IDENTIFIER -> {
                 // Could be variable, array access, or subroutine call
                 // Need to look ahead to determine which
-                String identifier = tokenizer.identifier();
                 if (tokenizer.hasMoreTokens()) {
                     tokenizer.advance();
-                    char nextChar = tokenizer.symbol();
-                    tokenizer.retreat();
-                    
-                    if (nextChar == '[') {
-                        // Array access: varName '[' expression ']'
-                        writeCurrentToken(); // varName
-                        advanceAndWrite(); // '['
-                        compileExpression();
-                        advanceAndWrite(); // ']'
-                    } else if (nextChar == '(' || nextChar == '.') {
-                        // Subroutine call
+                    if (tokenizer.tokenType() == JackTokenizer.TokenType.SYMBOL) {
+                        char nextChar = tokenizer.symbol();
                         tokenizer.retreat();
-                        compileSubroutineCall();
+                        
+                        if (nextChar == '[') {
+                            // Array access: varName '[' expression ']'
+                            writeCurrentToken(); // varName
+                            advanceAndWrite(); // '['
+                            compileExpression();
+                            advanceAndWrite(); // ']'
+                        } else if (nextChar == '(' || nextChar == '.') {
+                            // Subroutine call
+                            tokenizer.retreat();
+                            compileSubroutineCall();
+                        } else {
+                            // Simple variable
+                            writeCurrentToken();
+                        }
                     } else {
-                        // Simple variable
+                        // Next token is not a symbol, so this is a simple variable
+                        tokenizer.retreat();
                         writeCurrentToken();
                     }
                 } else {
