@@ -22,8 +22,13 @@ public class JackAnalyzer {
     public static void main(String[] args) throws IOException {
         // Exit if no arguments
         if (args.length == 0) {
+            // TODO: Temp workaround for debugging
+            System.out.println("Temporary measure to make debugging easier");
+            args = new String[1];
+            args[0] = "/Users/zo0994584/Desktop/Ch10/ArrayTest/Main.jack";
+            
             System.out.println("Error: Filepath required.\n");
-            return;
+            //return;
         }
 
         // Argument variables
