@@ -23,7 +23,7 @@ public class JackTokenizer {
     } // T_KEYWORD T_INT K_CHAR K_BOOLEAN
 
     // Set of all Jack language keywords
-    private static final Set<String> KEYWORDS = Set.of(
+    public static final Set<String> KEYWORDS = Set.of(
             "class", "constructor", "function", "method", "field", "static", "var",
             "int", "char", "boolean", "void", "true", "false", "null", "this",
             "let", "do", "if", "else", "while", "return");

@@ -68,7 +68,7 @@
 <expressionList>
 <expression>
 <term>
-<symbol> ) </symbol>
+<identifier> length </identifier>
 </term>
 </expression>
 </expressionList>
@@ -93,11 +93,11 @@
 <symbol> ( </symbol>
 <expression>
 <term>
-<symbol> &lt; </symbol>
+<identifier> i </identifier>
 </term>
 <symbol> &lt; </symbol>
 <term>
-<symbol> ) </symbol>
+<identifier> length </identifier>
 </term>
 </expression>
 <symbol> ) </symbol>
@@ -109,7 +109,7 @@
 <symbol> [ </symbol>
 <expression>
 <term>
-<symbol> ] </symbol>
+<identifier> i </identifier>
 </term>
 </expression>
 <symbol> ] </symbol>
@@ -138,7 +138,7 @@
 <symbol> = </symbol>
 <expression>
 <term>
-<symbol> + </symbol>
+<identifier> i </identifier>
 </term>
 <symbol> + </symbol>
 <term>
@@ -177,11 +177,11 @@
 <symbol> ( </symbol>
 <expression>
 <term>
-<symbol> &lt; </symbol>
+<identifier> i </identifier>
 </term>
 <symbol> &lt; </symbol>
 <term>
-<symbol> ) </symbol>
+<identifier> length </identifier>
 </term>
 </expression>
 <symbol> ) </symbol>
@@ -193,15 +193,15 @@
 <symbol> = </symbol>
 <expression>
 <term>
-<symbol> + </symbol>
+<identifier> sum </identifier>
 </term>
 <symbol> + </symbol>
 <term>
-<symbol> [ </symbol>
+<identifier> a </identifier>
 <symbol> [ </symbol>
 <expression>
 <term>
-<symbol> ] </symbol>
+<identifier> i </identifier>
 </term>
 </expression>
 <symbol> ] </symbol>
@@ -215,7 +215,7 @@
 <symbol> = </symbol>
 <expression>
 <term>
-<symbol> + </symbol>
+<identifier> i </identifier>
 </term>
 <symbol> + </symbol>
 <term>
@@ -252,11 +252,11 @@
 <expressionList>
 <expression>
 <term>
-<symbol> / </symbol>
+<identifier> sum </identifier>
 </term>
 <symbol> / </symbol>
 <term>
-<symbol> ) </symbol>
+<identifier> length </identifier>
 </term>
 </expression>
 </expressionList>
@@ -282,4 +282,5 @@
 <symbol> } </symbol>
 </subroutineBody>
 </subroutineDec>
+<symbol> } </symbol>
 </class>

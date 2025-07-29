@@ -580,8 +580,6 @@ public class CompilationEngine {
     public void compileTerm() {
         writeOpenTag("term");
         
-        tokenizer.advance();
-        
         switch (tokenizer.tokenType()) {
             case INT_CONST, STRING_CONST -> {
                 // Integer or string constant
