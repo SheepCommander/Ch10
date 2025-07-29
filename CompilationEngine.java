@@ -21,7 +21,6 @@ public class CompilationEngine {
         System.out.println("\tkeyword: " + keyword);
     }
 
-
     /**
      * Creates a new compilation engine with the given input and output files.
      * Opens the input file and prepares for parsing.
