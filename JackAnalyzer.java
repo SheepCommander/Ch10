@@ -8,7 +8,7 @@
  * through the following logic:
  *  1. Create a JackTokenizer from the Xxx.jack input file.
  *  2. Create an output file called Xxx.xml and prepare it for writing.
- *  3. Use the CompilationEngine to compile the input JackTokenizer into the output file
+ *  3. Use the CompilationEngine to compile the input JackTokenizer into the output file.
  */
 import java.io.*;
 
@@ -76,12 +76,15 @@ public class JackAnalyzer {
             }
             writer.println("</tokens>");
             writer.close();
-            System.out.println("Token XML generated");
+            System.out.println(fileI.getName() + " - Token XML generated");
 
             // Ch10 Stage 2: CompilationEngine
             CompilationEngine compiler = new CompilationEngine(fileI, new File(fileI.getPath().replace(".jack", ".xml")));
             compiler.compileClass();
-            System.out.println("Compiled XML generated");
+            System.out.println(fileI.getName() + " - Compiled XML generated");
         }
+
+        System.out.println();
+        System.out.println();
     }
 }
