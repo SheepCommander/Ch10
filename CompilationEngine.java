@@ -17,10 +17,6 @@ public class CompilationEngine {
     private JackTokenizer tokenizer;
     private PrintWriter writer;
 
-    public void debug(String keyword) {
-        System.out.println("\tkeyword: " + keyword);
-    }
-
     /**
      * Creates a new compilation engine with the given input and output files.
      * Opens the input file and prepares for parsing.
@@ -33,11 +29,13 @@ public class CompilationEngine {
             tokenizer = new JackTokenizer(inputFile);
             writer = new PrintWriter(outputFile);
             compileClass();
-            writer.close();
+            close();
         } catch (IOException e) {
             System.out.println("error compilation engine constructor: " + e);
         }
     }
+
+    // ========== UTILITY METHODS ==========
 
     /**
      * Writes a given String to the file.
@@ -48,6 +46,17 @@ public class CompilationEngine {
         writer.println(s);
     }
 
+    /**
+     * Closes the output writer. Should be called after compilation is complete.
+     */
+    private void close() {
+        writer.close();
+    }
+
+    /**
+     * Given a comparison token (&, <, >) returns its XML counterpart (&amp, &lt,
+     * &gt)
+     */
     private String comparisonSwitch(char token) {
         return switch (token) {
             case '&' -> "&amp;";
@@ -57,9 +66,16 @@ public class CompilationEngine {
         };
     }
 
+    // ========== JACK GRAMMAR COMPILATION METHODS ==========
+
     /**
-     * compileClass() is the only public method. All other methods are called
-     * using recursive descent parsing. *
+     * Compiles a complete class.
+     * Grammar: 'class' className '{' classVarDec* subroutineDec* '}'
+     * 
+     * This is the entry point for parsing a Jack class. It handles the class
+     * keyword,
+     * class name, opening brace, any number of class variable declarations,
+     * any number of subroutine declarations, and the closing brace.
      */
     public void compileClass() {
 
@@ -109,6 +125,13 @@ public class CompilationEngine {
          */
     }
 
+    /**
+     * Compiles a static declaration or a field declaration.
+     * Grammar: ('static' | 'field') type varName (',' varName)* ';'
+     * 
+     * Handles class-level variable declarations. Can be either static variables
+     * (class variables) or field variables (instance variables).
+     */
     private void compileClassVarDec() {
         // classVarDec: ('static' | 'field') type varName (',' vaName)* ';'
         w("<classVarDec>");
@@ -143,10 +166,19 @@ public class CompilationEngine {
     }
 
     /**
+     * Compiles a complete method, function, or constructor.
+     * Grammar: ('constructor' | 'function' | 'method') ('void' | type)
+     * subroutineName
+     * '(' parameterList ')' subroutineBody
+     * 
+     * Handles all three types of subroutines in Jack: constructors (create
+     * objects),
+     * functions (static methods), and methods (instance methods).
+     * 
      * Section 10.3.3 suggests making compileSubroutine. Figure 10.5 does not
      * explicitly define subroutine but we can infer it as being a subroutine
      * declaration (subroutineDec) followed by a subroutine body
-     * (subroutineBody), both of which are defined. *
+     * (subroutineBody), both of which are defined.
      */
     private void compileSubroutine() {
         // subroutine: subroutineDec subroutineBody
@@ -183,6 +215,13 @@ public class CompilationEngine {
         w("</subroutineDec>");
     }
 
+    /**
+     * Compiles a subroutine's body.
+     * Grammar: '{' varDec* statements '}'
+     * 
+     * The body of a subroutine contains local variable declarations followed
+     * by the executable statements.
+     */
     private void compileSubroutineBody() {
         w("<subroutineBody>");
 
@@ -201,6 +240,14 @@ public class CompilationEngine {
         w("</subroutineBody>");
     }
 
+    /**
+     * Compiles a (possibly empty) parameter list, not including the enclosing "()".
+     * Grammar: ((type varName) (',' type varName)*)?
+     * 
+     * Handles the formal parameters of a subroutine. The parameter list can be
+     * empty
+     * or contain one or more parameters separated by commas.
+     */
     private void compileParameterList() {
         // parameterList: ((type varName) (',' type varName)*)?
         w("<parameterList>");
@@ -240,6 +287,13 @@ public class CompilationEngine {
         w("</parameterList>");
     }
 
+    /**
+     * Compiles a var declaration.
+     * Grammar: 'var' type varName (',' varName)* ';'
+     * 
+     * Handles local variable declarations within subroutines. Multiple variables
+     * of the same type can be declared in a single statement.
+     */
     private void compileVarDec() {
         // varDec: 'var' type varName (',' type varName)*)?
         w("<varDec>");
@@ -272,6 +326,13 @@ public class CompilationEngine {
         w("</varDec>");
     }
 
+    /**
+     * Compiles a sequence of statements, not including the enclosing "{}".
+     * Grammar: statement*
+     * 
+     * A sequence of zero or more statements. This method handles the dispatch
+     * to specific statement compilation methods based on the statement type.
+     */
     private void compileStatements() {
         // statements: statement*
         w("<statements>");
@@ -294,6 +355,13 @@ public class CompilationEngine {
 
     }
 
+    /**
+     * Compiles a do statement.
+     * Grammar: 'do' subroutineCall ';'
+     * 
+     * Do statements are used to call subroutines whose return value is discarded.
+     * The subroutineCall can be a method call or a function call.
+     */
     private void compileDo() {
         // doStatement: 'do' subroutineCall ';'
         w("<doStatement>");
@@ -330,6 +398,13 @@ public class CompilationEngine {
         w("</doStatement>");
     }
 
+    /**
+     * Compiles a let statement.
+     * Grammar: 'let' varName ('[' expression ']')? '=' expression ';'
+     * 
+     * Let statements handle variable assignment. Can assign to simple variables
+     * or array elements (indicated by the optional array indexing).
+     */
     private void compileLet() {
         // letStatement: 'let' varName ('[' expression ']')? '=' expression ';'
 
@@ -368,6 +443,13 @@ public class CompilationEngine {
         w("</letStatement>");
     }
 
+    /**
+     * Compiles a while statement.
+     * Grammar: 'while' '(' expression ')' '{' statements '}'
+     * 
+     * While loops continue executing the statements in the body as long as
+     * the condition expression evaluates to true (non-zero).
+     */
     private void compileWhile() {
         // whileStatement: 'while' '(' expression ')' '{' statements '}'
 
@@ -402,6 +484,14 @@ public class CompilationEngine {
         w("</whileStatement>");
     }
 
+    /**
+     * Compiles a return statement.
+     * Grammar: 'return' expression? ';'
+     * 
+     * Return statements end subroutine execution. For void subroutines,
+     * no expression is provided. For non-void subroutines, an expression
+     * specifies the return value.
+     */
     private void compileReturn() {
         // returnStatement: 'return' expression? ';'
         w("<returnStatement>");
@@ -423,6 +513,14 @@ public class CompilationEngine {
 
     }
 
+    /**
+     * Compiles an if statement, possibly with a trailing else clause.
+     * Grammar: 'if' '(' expression ')' '{' statements '}' ('else' '{' statements
+     * '}')?
+     * 
+     * If statements provide conditional execution. The optional else clause
+     * executes when the condition is false (zero).
+     */
     private void compileIf() {
         // ifStatement: 'if' '(' expression ')' '{' statements '}'
         // ('else' '{' statements '}')?
@@ -472,6 +570,14 @@ public class CompilationEngine {
         w("</ifStatement>");
     }
 
+    /**
+     * Compiles an expression.
+     * Grammar: term (op term)*
+     * 
+     * Expressions are built from terms connected by binary operators.
+     * This implements left-associative parsing of binary expressions.
+     * Operators: +, -, *, /, &, |, <, >, =
+     */
     private void compileExpression() {
         // expression: term (op term)*
         w("<expression>");
@@ -487,18 +593,25 @@ public class CompilationEngine {
 
     }
 
-    private boolean isValidSymbol(char c) {
-        return "+-*/&|<>=".indexOf(c) != -1;
-    }
-
     /**
-     * Near the end of section 10.1.3, it is mentioned that the Jack grammer is
-     * "almost" LL(0). The exception being that lookahead is required for the
-     * parsing of expressions. Specifically, a subroutineCall starts with an
-     * identifier which makes it impossible to differentiate from varName
-     * without more context either in terms of a pre-populated symbol table or a
-     * lookahead. Subroutine call identifiers are always followed by an '('.
-     * Looking ahead one token resolves the problem. *
+     * Compiles a term. This routine is faced with a slight difficulty when trying
+     * to decide between
+     * some of the alternative parsing rules. Specifically, if the current token is
+     * an identifier,
+     * the routine must distinguish between a variable, an array entry, and a
+     * subroutine call.
+     * A single look-ahead token, which may be one of "[", "(", or "." suffices to
+     * distinguish
+     * between the three possibilities. Any other token is not part of this term and
+     * should not be
+     * advanced over.
+     * Grammar: integerConstant | stringConstant | keywordConstant | varName |
+     * varName '[' expression ']' | subroutineCall | '(' expression ')' | unaryOp
+     * term
+     * 
+     * Terms are the basic building blocks of expressions. This method handles
+     * all possible term types including constants, variables, array access,
+     * subroutine calls, parenthesized expressions, and unary operations.
      */
     private void compileTerm() {
         // term: integerConstant | stringConstant | keywordConstant |
@@ -573,6 +686,13 @@ public class CompilationEngine {
         w("</term>");
     }
 
+    /**
+     * Compiles a (possibly empty) comma-separated list of expressions.
+     * Grammar: (expression (',' expression)*)?
+     * 
+     * Used for subroutine call arguments. The list can be empty or contain
+     * one or more expressions separated by commas.
+     */
     private void compileExpressionList() {
         // expressionList: ( expression (',' expression)* )?
         w("<expressionList>");
@@ -588,5 +708,11 @@ public class CompilationEngine {
         }
 
         w("</expressionList>");
+    }
+
+    // ========== HELPER METHODS FOR SPECIFIC CONSTRUCTS ==========
+
+    private boolean isValidSymbol(char c) {
+        return "+-*/&|<>=".indexOf(c) != -1;
     }
 }
